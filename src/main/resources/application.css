@@ -1,0 +1,70 @@
+.root {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-background-color: #f4f7fb;
+}
+
+.login-page {
+    -fx-background-color: linear-gradient(to bottom right, #12355b, #296a9f);
+    -fx-padding: 36;
+}
+
+.login-card, .card {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-padding: 26;
+    -fx-effect: dropshadow(gaussian, rgba(26, 52, 82, 0.15), 16, 0.2, 0, 4);
+}
+
+.app-title, .screen-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #183c62;
+}
+
+.screen-title {
+    -fx-font-size: 25px;
+}
+
+.subtitle, .hint {
+    -fx-text-fill: #62748a;
+}
+
+.hint {
+    -fx-font-size: 11px;
+}
+
+.section-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #183c62;
+}
+
+.primary-button, .danger-button {
+    -fx-background-radius: 6;
+    -fx-padding: 10 16;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.primary-button {
+    -fx-background-color: #1c639b;
+}
+
+.danger-button {
+    -fx-background-color: #af3f45;
+}
+
+.top-bar {
+    -fx-background-color: #183c62;
+    -fx-padding: 14 28;
+    -fx-text-fill: white;
+}
+
+.top-bar .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-view {
+    -fx-background-radius: 8;
+}

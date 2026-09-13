@@ -1,3 +1,5 @@
 build/
 out/
+.m2/
+data/*.db
 *.class

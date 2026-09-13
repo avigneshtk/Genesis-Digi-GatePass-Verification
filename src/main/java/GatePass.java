@@ -1,9 +1,8 @@
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class GatePass
 {
-    private static int nextNumber = 1;
-
     private final String id;
     private final Student student;
     private final String destination;
@@ -16,13 +15,27 @@ public class GatePass
 
     public GatePass(Student student, String destination, String reason, String outDateTime, String returnDateTime)
     {
-        this.id = String.format("GP-%03d", nextNumber++);
+        this.id = "GP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.student = student;
         this.destination = destination;
         this.reason = reason;
         this.outDateTime = outDateTime;
         this.returnDateTime = returnDateTime;
         this.status = "PENDING";
+    }
+
+    public GatePass(String id, Student student, String destination, String reason, String outDateTime,
+                    String returnDateTime, String status, String decidedBy, String decisionTime)
+    {
+        this.id = id;
+        this.student = student;
+        this.destination = destination;
+        this.reason = reason;
+        this.outDateTime = outDateTime;
+        this.returnDateTime = returnDateTime;
+        this.status = status;
+        this.decidedBy = decidedBy;
+        this.decisionTime = decisionTime;
     }
 
     public Student getStudent()
@@ -38,6 +51,36 @@ public class GatePass
     public String getStatus()
     {
         return status;
+    }
+
+    public String getDestination()
+    {
+        return destination;
+    }
+
+    public String getReason()
+    {
+        return reason;
+    }
+
+    public String getOutDateTime()
+    {
+        return outDateTime;
+    }
+
+    public String getReturnDateTime()
+    {
+        return returnDateTime;
+    }
+
+    public String getDecidedBy()
+    {
+        return decidedBy;
+    }
+
+    public String getDecisionTime()
+    {
+        return decisionTime;
     }
 
     public void approve(Warden warden)
