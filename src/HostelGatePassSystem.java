@@ -1,3 +1,5 @@
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -106,18 +108,32 @@ public class HostelGatePassSystem
 
     private static void createGatePass(Student student)
     {
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime defaultLeaveTime = LocalDateTime.now().plusHours(6);
+        LocalDateTime defaultReturnTime = defaultLeaveTime.plusDays(2);
+
         System.out.print("Destination: ");
         String destination = scanner.nextLine();
         System.out.print("Reason for leave: ");
         String reason = scanner.nextLine();
-        System.out.print("Out date and time (example: 2026-09-15 10:00): ");
+        System.out.print("Leave date and time [" + defaultLeaveTime.format(dateFormat) + "]: ");
         String outDateTime = scanner.nextLine();
-        System.out.print("Expected return date and time: ");
+        System.out.print("Expected return date and time [" + defaultReturnTime.format(dateFormat) + "]: ");
         String returnDateTime = scanner.nextLine();
 
-        if (destination.isBlank() || reason.isBlank() || outDateTime.isBlank() || returnDateTime.isBlank())
+        if (outDateTime.isBlank())
         {
-            System.out.println("All gatepass details are required.");
+            outDateTime = defaultLeaveTime.format(dateFormat);
+        }
+
+        if (returnDateTime.isBlank())
+        {
+            returnDateTime = defaultReturnTime.format(dateFormat);
+        }
+
+        if (destination.isBlank() || reason.isBlank())
+        {
+            System.out.println("Destination and reason are required.");
             return;
         }
 
