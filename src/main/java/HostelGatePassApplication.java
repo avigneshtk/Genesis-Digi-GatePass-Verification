@@ -226,7 +226,6 @@ public class HostelGatePassApplication extends Application
 
         database.updateDecision(selectedPass);
         table.refresh();
-        showInformation("Gatepass updated", "The request has been " + selectedPass.getStatus().toLowerCase() + ".");
     }
 
     private boolean confirmDecisionChange(GatePass gatePass, boolean approve)

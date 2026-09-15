@@ -3,3 +3,4 @@ out/
 .m2/
 data/*.db
 *.class
+AGENTS.md

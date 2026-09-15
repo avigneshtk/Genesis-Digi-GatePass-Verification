@@ -3,9 +3,10 @@
 ## Run
 
 ```bash
-javac -d build src/HostelGatePassSystem.java
-java -cp build HostelGatePassSystem
+mvn javafx:run
 ```
+
+The application creates its SQLite database at `data/gatepass.db` on first run.
 
 Demo logins:
 
