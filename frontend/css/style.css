@@ -1,32 +1,106 @@
-/* One shared stylesheet for all pages. */
+/* One shared stylesheet for all pages - dark campus theme. */
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f0f4f8;
-  color: #1f2933;
+  color: #ffffff;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle, rgba(13, 17, 24, 0.75) 0%, rgba(13, 17, 24, 0.92) 100%),
+    url('../campus.jpg') no-repeat center center / cover fixed;
 }
 
-/* ---------- top bar ---------- */
+/* Fullscreen Balanced Campus Background Layer (used on the login page) */
+.bg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle, rgba(13, 17, 24, 0.6) 0%, rgba(13, 17, 24, 0.85) 100%),
+    url('../campus.jpg') no-repeat center center / cover;
+  filter: blur(2.5px) brightness(0.85);
+  transform: scale(1.02);
+  z-index: -1;
+}
 
+/* ---------- header / navbar ---------- */
+
+.navbar,
 .topbar {
-  background: #1f3a5f;
-  color: white;
-  padding: 14px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px 40px;
+  background-color: rgba(13, 17, 24, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.brand-logo span {
+  color: #eab308;
 }
 
 .topbar h1 {
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.nav-links {
+  display: flex;
+  background-color: rgba(23, 31, 46, 0.8);
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+}
+
+.nav-item {
+  padding: 8px 20px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-item.active, .nav-item:hover {
+  background-color: #242f42;
+  color: #ffffff;
+}
+
+.btn-login-nav {
+  background-color: transparent;
+  border: 1px solid #eab308;
+  color: #eab308;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-login-nav:hover {
+  background-color: #eab308;
+  color: #0f141d;
 }
 
 .user-chip {
@@ -36,56 +110,165 @@ body {
   font-size: 0.9rem;
 }
 
+.logout-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
+  padding: 6px 12px;
+  margin-top: 0 !important;
+}
+
+.logout-button:hover {
+  background: #eab308 !important;
+  color: #0f141d !important;
+}
+
 /* ---------- layout ---------- */
+
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  padding: 60px 20px;
+}
 
 .container {
   max-width: 960px;
   margin: 0 auto;
   padding: 24px 16px 48px;
+  flex-grow: 1;
 }
 
 .subtitle {
-  color: #52606d;
+  color: #94a3b8;
   margin-bottom: 16px;
 }
 
 h2 {
   margin: 24px 0 12px;
   font-size: 1.15rem;
+  color: #eab308;
 }
 
-/* ---------- cards and forms ---------- */
+/* ---------- cards / glassmorphism ---------- */
+
+.login-card {
+  background: rgba(18, 24, 38, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  width: 100%;
+  max-width: 440px;
+  padding: 36px 32px;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
 
 .card {
-  background: white;
-  border-radius: 10px;
+  background: rgba(18, 24, 38, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 1px 4px rgba(31, 58, 95, 0.12);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
 }
 
+.pass-card {
+  background: rgba(18, 24, 38, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+/* Scroll Animation States */
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade-in-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-title {
+  font-size: 1.8rem;
+  text-align: center;
+  color: #eab308;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+
+/* ---------- role selector tabs ---------- */
+
+.role-tabs {
+  display: flex;
+  background-color: rgba(13, 17, 24, 0.7);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.role-tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.role-tab.active {
+  background-color: #eab308;
+  color: #0f141d;
+}
+
+/* ---------- forms ---------- */
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label,
 form label {
   display: block;
-  font-size: 0.85rem;
+  margin-bottom: 8px;
+  font-size: 0.88rem;
   font-weight: 600;
-  color: #3e4c59;
-  margin: 12px 0 4px;
+  color: #cbd5e1;
 }
 
+.form-control,
 input,
 textarea,
 select {
   width: 100%;
-  padding: 9px 10px;
-  border: 1px solid #cbd2d9;
-  border-radius: 6px;
+  padding: 12px 16px;
+  background-color: rgba(34, 45, 66, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  outline: none;
   font: inherit;
-  background: #fbfdfe;
 }
 
+.form-control:focus,
 input:focus,
-textarea:focus {
-  outline: 2px solid #4a90d9;
-  border-color: #4a90d9;
+textarea:focus,
+select:focus {
+  border-color: #eab308;
 }
 
 .form-row {
@@ -97,21 +280,35 @@ textarea:focus {
   flex: 1;
 }
 
-/* ---------- buttons ---------- */
-
-button {
-  font: inherit;
-  border: none;
-  border-radius: 6px;
-  padding: 9px 16px;
-  cursor: pointer;
-  background: #4a90d9;
-  color: white;
-  margin-top: 12px;
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }
 
-button:hover {
-  filter: brightness(1.08);
+/* ---------- buttons ---------- */
+
+button,
+.btn-submit {
+  font: inherit;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #0f141d;
+  font-weight: 700;
+  background-color: #eab308;
+  padding: 10px 16px;
+  margin-top: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+button:hover,
+.btn-submit:hover {
+  background-color: #ca8a04;
 }
 
 button:disabled {
@@ -119,16 +316,25 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.approve {
-  background: #2f9e44;
+button.approve {
+  background-color: #2f9e44;
+  color: #ffffff;
 }
 
-.reject {
-  background: #e03131;
+button.reject {
+  background-color: #e03131;
+  color: #ffffff;
 }
 
-.secondary {
-  background: #627d98;
+.secondary,
+button.secondary {
+  background: #334155;
+  color: #ffffff;
+}
+
+.secondary:hover,
+button.secondary:hover {
+  background: #475569;
 }
 
 /* ---------- tables ---------- */
@@ -136,23 +342,25 @@ button:disabled {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 10px;
+  background: rgba(18, 24, 38, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(31, 58, 95, 0.12);
   font-size: 0.92rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
 }
 
 th,
 td {
   text-align: left;
   padding: 10px 12px;
-  border-bottom: 1px solid #e4e9ef;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 th {
-  background: #f5f8fb;
-  color: #3e4c59;
+  background: rgba(23, 31, 46, 0.9);
+  color: #cbd5e1;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -173,23 +381,23 @@ tr:last-child td {
 }
 
 .badge.PENDING {
-  background: #fff3d6;
-  color: #8a6d00;
+  background: rgba(234, 179, 8, 0.2);
+  color: #eab308;
 }
 
 .badge.APPROVED {
-  background: #e3f5e8;
-  color: #1e7c34;
+  background: rgba(47, 158, 68, 0.25);
+  color: #6ee7a0;
 }
 
 .badge.REJECTED {
-  background: #fde5e5;
-  color: #b02a2a;
+  background: rgba(224, 49, 49, 0.25);
+  color: #fca5a5;
 }
 
 .badge.EXPIRED {
-  background: #e6e9ec;
-  color: #52606d;
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
 }
 
 /* ---------- messages / results ---------- */
@@ -197,31 +405,33 @@ tr:last-child td {
 .message {
   margin-top: 12px;
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .message.error {
-  color: #b02a2a;
+  color: #fca5a5;
 }
 
 .message.success {
-  color: #1e7c34;
+  color: #6ee7a0;
 }
 
 .result-box {
   margin-top: 16px;
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 18px;
   font-size: 1rem;
+  border: 2px solid;
 }
 
 .result-box.valid {
-  background: #e3f5e8;
-  border: 2px solid #2f9e44;
+  background: rgba(47, 158, 68, 0.2);
+  border-color: #2f9e44;
 }
 
 .result-box.invalid {
-  background: #fde5e5;
-  border: 2px solid #e03131;
+  background: rgba(224, 49, 49, 0.2);
+  border-color: #e03131;
 }
 
 .result-box h3 {
@@ -241,8 +451,25 @@ tr:last-child td {
   font-size: 2.6rem;
 }
 
-.login-box form {
-  text-align: left;
+.card-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.88rem;
+  color: #94a3b8;
+}
+
+.card-footer a {
+  color: #eab308;
+  text-decoration: none;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(13, 17, 24, 0.85);
 }
 
 /* ---------- student page extras ---------- */
@@ -251,13 +478,6 @@ tr:last-child td {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
-}
-
-.pass-card {
-  background: white;
-  border-radius: 10px;
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(31, 58, 95, 0.12);
 }
 
 .pass-card .pass-top {
@@ -273,7 +493,7 @@ tr:last-child td {
 }
 
 .pass-card .times {
-  color: #52606d;
+  color: #94a3b8;
   font-size: 0.85rem;
   margin-bottom: 10px;
 }
@@ -285,19 +505,11 @@ tr:last-child td {
 }
 
 .qr-holder img {
-  border: 8px solid white;
+  border: 8px solid rgba(255, 255, 255, 0.9);
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(31, 58, 95, 0.2);
 }
 
 .empty-note {
-  color: #7b8794;
+  color: #94a3b8;
   font-style: italic;
-}
-
-.logout-button {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  padding: 6px 12px;
-  margin-top: 0;
 }

@@ -96,27 +96,36 @@ function startScanner() {
   }
 
   scanner = new Html5Qrcode('reader');
-  scanner
-    .start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: 220 },
-      (decodedText) => {
-        document.getElementById('token').value = decodedText;
-        verifyToken(decodedText);
-      },
-      () => {} // ignore the many "no QR seen" frames
-    )
-    .catch((error) => {
-      // Explain the most common camera problems in plain words.
-      const messages = {
-        NotAllowedError: 'Camera permission was denied. Allow camera access for this site in your browser, then refresh the page.',
-        NotFoundError: 'No camera was found on this device. Type the token below instead.',
-        NotReadableError: 'The camera is already in use by another app. Close that app and refresh the page.',
-      };
-      const reason = messages[error.name] ||
-        'Camera could not start (it only works on localhost or https). Type the token below instead.';
-      readerBox.innerHTML = `<p class="empty-note">${reason}</p>`;
-    });
+  // Laptops only have a front camera, phones mainly have a back camera.
+  // Try the back camera first, then fall back to any camera.
+  startWithFacingMode('environment', () => startWithFacingMode('user', () => showCameraError({ name: 'NotAllowedError' })));
+
+  function startWithFacingMode(facingMode, onFail) {
+    scanner
+      .start(
+        { facingMode },
+        { fps: 10, qrbox: 220 },
+        (decodedText) => {
+          document.getElementById('token').value = decodedText;
+          verifyToken(decodedText);
+        },
+        () => {} // ignore the many "no QR seen" frames
+      )
+      .catch(onFail);
+  }
+
+  // Explain the most common camera problems in plain words.
+  function showCameraError(error) {
+    const messages = {
+      NotAllowedError: 'Camera permission was denied. Click the camera icon near the address bar (or your browser site settings), allow the camera for this site, then refresh the page.',
+      NotFoundError: 'No camera was found on this device. Type the token below instead.',
+      NotReadableError: 'The camera is already in use by another app (Zoom, Meet, OBS...). Close that app and refresh the page.',
+      OverconstrainedError: 'The camera could not start with the requested settings. Type the token below instead.',
+    };
+    const reason = messages[error.name] ||
+      'Camera could not start. Type the token below instead.';
+    document.getElementById('reader').innerHTML = `<p class="empty-note">${reason}</p>`;
+  }
 }
 
 async function loadActivity() {
