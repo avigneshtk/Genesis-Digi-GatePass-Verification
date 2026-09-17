@@ -1,17 +1,71 @@
 // Small helpers shared by all pages: calling the API, formatting, logout.
 
+// Backend URL resolution:
+// 1. window.API_BASE_URL (if injected)
+// 2. localStorage.getItem('API_BASE_URL') (allows user/developer to configure easily)
+// 3. Defaults to '' (relative path: works with Vercel rewrites or local dev)
+function getApiBaseUrl() {
+  return window.API_BASE_URL || localStorage.getItem('API_BASE_URL') || '';
+}
+
+function setApiBaseUrl(url) {
+  if (url) {
+    localStorage.setItem('API_BASE_URL', url.trim().replace(/\/+$/, ''));
+  } else {
+    localStorage.removeItem('API_BASE_URL');
+  }
+}
+
+function getApiUrl(path) {
+  const base = getApiBaseUrl();
+  if (!base || path.startsWith('http')) return path;
+  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+}
+
+// Session token helpers
+function getSessionToken() {
+  return localStorage.getItem('gp_session_token');
+}
+
+function setSessionToken(token) {
+  if (token) {
+    localStorage.setItem('gp_session_token', token);
+  } else {
+    localStorage.removeItem('gp_session_token');
+  }
+}
+
 // Call any /api route and return the JSON answer.
 // Throws an Error with a readable message when something goes wrong.
 async function api(path, options = {}) {
-  const response = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
+  const fullUrl = getApiUrl(path);
+  const token = getSessionToken();
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(fullUrl, {
+    credentials: 'include',
     ...options,
+    headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
+
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(data.error || 'Something went wrong. Please try again.');
   }
+
+  if (data && data.token) {
+    setSessionToken(data.token);
+  }
+
   return data;
 }
 
@@ -43,8 +97,11 @@ function setupLogoutButton() {
   button.addEventListener('click', async () => {
     try {
       await api('/api/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.warn('Logout request failed:', err);
     } finally {
-      // Always go back to the login page, even if the server call failed.
+      // Clear token and go back to login
+      setSessionToken(null);
       window.location.href = '/index.html';
     }
   });
@@ -56,13 +113,17 @@ function setupLogoutButton() {
 async function checkLogin(expectedRole) {
   try {
     const data = await api('/api/auth/me');
-    if (data.user.role !== expectedRole) {
+    if (expectedRole && data.user.role !== expectedRole) {
       window.location.href = '/index.html';
       return false;
     }
-    document.getElementById('userName').textContent = `${data.user.name} (${data.user.loginId})`;
+    const nameEl = document.getElementById('userName');
+    if (nameEl) {
+      nameEl.textContent = `${data.user.name} (${data.user.loginId})`;
+    }
     return true;
   } catch (error) {
+    setSessionToken(null);
     window.location.href = '/index.html';
     return false;
   }

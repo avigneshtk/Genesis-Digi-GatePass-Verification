@@ -7,9 +7,11 @@
     "start": "node backend/server.js"
   },
   "engines": {
-    "node": ">=23"
+    "node": ">=20"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "cors": "^2.8.6",
     "express": "^5.1.0",
     "qrcode": "^1.5.4"
   }

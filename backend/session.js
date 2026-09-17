@@ -3,20 +3,39 @@
 // The browser stores the session token in a cookie with this name.
 const SESSION_COOKIE = 'gp_session';
 
-// Reads the session token out of the request's Cookie header (or null).
+// Reads the session token out of Authorization header, custom header, query param, or Cookie.
 function readSessionToken(req) {
-  const cookies = req.headers.cookie;
-  if (!cookies) return null;
-  for (const part of cookies.split(';')) {
-    const [name, value] = part.trim().split('=');
-    if (name === SESSION_COOKIE) return value;
+  // 1. Bearer token in Authorization header
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7).trim();
+    if (token) return token;
   }
+
+  // 2. Custom header
+  if (req.headers['x-session-token']) {
+    return req.headers['x-session-token'];
+  }
+
+  // 3. Query parameter (useful for loading QR image tags cross-origin)
+  if (req.query && req.query.token) {
+    return req.query.token;
+  }
+
+  // 4. Cookie
+  const cookies = req.headers.cookie;
+  if (cookies) {
+    for (const part of cookies.split(';')) {
+      const [name, value] = part.trim().split('=');
+      if (name === SESSION_COOKIE && value) return value;
+    }
+  }
+
   return null;
 }
 
 // Express middleware: only let the request through if the user is logged in
 // and (when role names are given) has one of those roles.
-// Usage: requireRole('STUDENT')  or  requireRole() for any logged-in user.
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user) {

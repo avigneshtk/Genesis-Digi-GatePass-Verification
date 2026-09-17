@@ -90,7 +90,8 @@ async function loadPasses() {
 
 // Show the QR code image of an approved pass in the big dialog.
 function showQrCode(pass) {
-  document.getElementById('qrImage').src = `/api/gatepasses/${pass.id}/qr`;
+  const tokenParam = getSessionToken() ? `?token=${encodeURIComponent(getSessionToken())}` : '';
+  document.getElementById('qrImage').src = getApiUrl(`/api/gatepasses/${pass.id}/qr${tokenParam}`);
   document.getElementById('qrTokenLabel').textContent = pass.qrToken;
   document.getElementById('qrValidUntil').textContent =
     `Valid until ${formatDateTime(pass.toDateTime)}`;

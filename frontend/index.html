@@ -72,8 +72,13 @@
   <!-- Page Footer -->
   <footer class="footer">
     Digital Gate Pass Verification System &bull; Hackathon Edition
+    <div style="margin-top: 6px; font-size: 12px; opacity: 0.75;">
+      <span id="apiEndpointIndicator">Backend: auto</span>
+      &bull; <a href="#" id="setApiBtn" style="color: inherit; text-decoration: underline;">Configure API</a>
+    </div>
   </footer>
 
+  <script src="/js/api.js"></script>
   <script>
     let currentRole = 'student';
 
@@ -82,6 +87,25 @@
       WARDEN: '/warden.html',
       SECURITY: '/security.html',
     };
+
+    function updateBackendIndicator() {
+      const el = document.getElementById('apiEndpointIndicator');
+      const base = getApiBaseUrl();
+      if (el) {
+        el.textContent = base ? `Backend: ${base}` : 'Backend: Same-Origin / Proxy';
+      }
+    }
+    updateBackendIndicator();
+
+    document.getElementById('setApiBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      const current = getApiBaseUrl();
+      const entered = prompt('Enter your Backend API URL (e.g. https://your-backend.onrender.com), or leave empty for same-origin proxy:', current);
+      if (entered !== null) {
+        setApiBaseUrl(entered);
+        updateBackendIndicator();
+      }
+    });
 
     function switchRole(event, role) {
       currentRole = role;
@@ -128,15 +152,10 @@
       message.className = 'message';
 
       try {
-        const response = await fetch('/api/auth/login', {
+        const data = await api('/api/auth/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ loginId, password }),
+          body: { loginId, password },
         });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(data.error || 'Login failed. Please try again.');
-        }
         window.location.href = rolePages[data.user.role] || '/index.html';
       } catch (error) {
         message.textContent = error.message;

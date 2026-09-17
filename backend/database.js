@@ -1,23 +1,73 @@
-// Opens the SQLite database, creates the tables and fills in demo users.
-// The whole database is one file: data/gatepass.db (delete it to reset all data).
-// We use Node's built-in "node:sqlite" module, so there is no database server to install.
-const { DatabaseSync } = require('node:sqlite');
+// Database connection and initialization.
+// Supports both:
+// 1. Cloud Database (Turso / libSQL) via TURSO_DATABASE_URL + TURSO_AUTH_TOKEN (or DATABASE_URL)
+// 2. Local SQLite file (data/gatepass.db) for local offline development.
+const { createClient } = require('@libsql/client');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-
-const DB_PATH = path.join(__dirname, '..', 'data', 'gatepass.db');
 
 // Turns a password into a fixed hash, so we never store the plain password.
 function hashPassword(password) {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
 
-function openDatabase() {
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  const db = new DatabaseSync(DB_PATH);
+async function openDatabase() {
+  const isCloud = Boolean(process.env.TURSO_DATABASE_URL || (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('libsql://')));
+  const dbUrl = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL;
+  const authToken = process.env.TURSO_AUTH_TOKEN;
 
-  db.exec(`
+  let client;
+
+  if (isCloud && dbUrl) {
+    console.log(`[Database] Connecting to cloud Turso database at ${dbUrl.split('@').pop()}`);
+    client = createClient({
+      url: dbUrl,
+      authToken: authToken,
+    });
+  } else {
+    const localDbPath = path.join(__dirname, '..', 'data', 'gatepass.db');
+    fs.mkdirSync(path.dirname(localDbPath), { recursive: true });
+    console.log(`[Database] Using local SQLite database file at ${localDbPath}`);
+    client = createClient({
+      url: `file:${localDbPath}`,
+    });
+  }
+
+  // Friendly beginner-style helpers wrapping @libsql/client
+  const db = {
+    // Get a single row or null
+    async get(sql, args = []) {
+      const rs = await client.execute({ sql, args });
+      return rs.rows.length > 0 ? rs.rows[0] : null;
+    },
+
+    // Get all matching rows as an array
+    async all(sql, args = []) {
+      const rs = await client.execute({ sql, args });
+      return rs.rows;
+    },
+
+    // Run an INSERT, UPDATE, or DELETE
+    async run(sql, args = []) {
+      const rs = await client.execute({ sql, args });
+      return {
+        lastInsertRowid: rs.lastInsertRowid !== undefined ? Number(rs.lastInsertRowid) : null,
+        rowsAffected: rs.rowsAffected,
+      };
+    },
+
+    // Run multiple SQL statements (for table creation)
+    async exec(sql) {
+      return await client.executeMultiple(sql);
+    },
+
+    client,
+    isCloud,
+  };
+
+  // Create tables if they do not exist
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       loginId TEXT UNIQUE NOT NULL,
@@ -44,14 +94,20 @@ function openDatabase() {
       action TEXT NOT NULL,
       timestamp TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      userId INTEGER NOT NULL,
+      createdAt TEXT NOT NULL
+    );
   `);
 
-  seedDemoUsers(db);
+  await seedDemoUsers(db);
   return db;
 }
 
-// Add the demo users once, so the app works out of the box.
-function seedDemoUsers(db) {
+// Add demo users once so the app works out of the box.
+async function seedDemoUsers(db) {
   const demoUsers = [
     { loginId: 'STU001', name: 'Rahul', password: 'student123', role: 'STUDENT', roomNumber: 'B-204' },
     { loginId: 'STU002', name: 'Priya', password: 'student123', role: 'STUDENT', roomNumber: 'A-101' },
@@ -59,15 +115,13 @@ function seedDemoUsers(db) {
     { loginId: 'SEC01', name: 'Gate Security', password: 'security123', role: 'SECURITY', roomNumber: null },
   ];
 
-  const findUser = db.prepare('SELECT id FROM users WHERE loginId = ?');
-  const insertUser = db.prepare(
-    'INSERT INTO users (loginId, name, password, role, roomNumber) VALUES (?, ?, ?, ?, ?)'
-  );
-
   for (const user of demoUsers) {
-    const existing = findUser.get(user.loginId);
+    const existing = await db.get('SELECT id FROM users WHERE loginId = ?', [user.loginId]);
     if (!existing) {
-      insertUser.run(user.loginId, user.name, hashPassword(user.password), user.role, user.roomNumber);
+      await db.run(
+        'INSERT INTO users (loginId, name, password, role, roomNumber) VALUES (?, ?, ?, ?, ?)',
+        [user.loginId, user.name, hashPassword(user.password), user.role, user.roomNumber]
+      );
     }
   }
 }

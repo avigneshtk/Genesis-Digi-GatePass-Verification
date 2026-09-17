@@ -246,11 +246,11 @@ The project follows basic security practices suitable for a hackathon applicatio
 
 Install:
 
-* Node.js 23+
+* Node.js 20+
 * npm
 * A modern web browser
 
-Node.js 23+ is required because the project uses the built-in `node:sqlite` module.
+Works with Node.js 20, 22, 23, and 24+. Local development uses SQLite automatically with zero external setup.
 
 ### Installation
 
@@ -285,6 +285,49 @@ http://localhost:3000
 ```
 
 > If the project's start command or port changes during development, update this section accordingly.
+
+---
+
+## 🌐 Production Deployment (Separated Architecture)
+
+The system is architected in 3 independent layers so it can be hosted in the cloud:
+
+```text
+┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
+│     Frontend    │ ───►  │     Backend     │ ───►  │     Database    │
+│     (Vercel)    │       │ (Render/Railway)│       │ (Turso libSQL)  │
+└─────────────────┘       └─────────────────┘       └─────────────────┘
+```
+
+### 1. Database: Turso (Free Cloud SQLite)
+1. Sign up at [turso.tech](https://turso.tech) (free tier).
+2. Create a database using the Turso CLI or web dashboard:
+   ```bash
+   turso db create gatepass-db
+   turso db show gatepass-db --url
+   turso db tokens create gatepass-db
+   ```
+3. Copy the database URL (`libsql://...`) and auth token.
+
+### 2. Backend: Render or Railway
+1. Push your repository to GitHub.
+2. In [Render](https://render.com) or [Railway](https://railway.app), create a new **Web Service** connected to your repository.
+3. Configure settings:
+   * **Build Command**: `npm install`
+   * **Start Command**: `npm start`
+4. Add Environment Variables:
+   * `TURSO_DATABASE_URL`: Your `libsql://...` URL
+   * `TURSO_AUTH_TOKEN`: Your Turso auth token
+   * `FRONTEND_URL`: `https://your-app.vercel.app` (your Vercel frontend URL)
+5. Deploy and copy your backend service URL (e.g. `https://genesis-backend.onrender.com`).
+
+### 3. Frontend: Vercel
+1. In [Vercel](https://vercel.com), click **Add New Project** and import this repository.
+2. Framework Preset: **Other**.
+3. Deploy!
+4. Pointing Frontend to Backend:
+   * **Option A (In-App)**: Open your deployed Vercel site, click **Configure API** at the bottom of the login page, and paste your backend URL (`https://genesis-backend.onrender.com`).
+   * **Option B (Vercel Proxy Rewrite)**: In `vercel.json`, add a rewrite for `/api/:path*` pointing to your backend URL so API calls are transparently proxied without cross-origin domain checks.
 
 ---
 
