@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 set -e
-mvn javafx:run
+npm install
+npm start

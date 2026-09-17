@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security - Hostel Gatepass System</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🛡️ Gate Security</h1>
+    <div class="user-chip">
+      <span id="userName"></span>
+      <button id="logoutButton" class="logout-button">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Verify a gate pass</h2>
+    <div class="card">
+      <p class="subtitle">Scan the student's QR code with the camera, or type the token (e.g. GP-8F42A91C).</p>
+
+      <div id="reader" style="width: 100%; max-width: 420px;"></div>
+
+      <form id="verifyForm">
+        <label for="token">Pass token</label>
+        <input id="token" type="text" placeholder="GP-XXXXXXXX" required />
+        <button type="submit">Check pass</button>
+      </form>
+
+      <div id="result"></div>
+    </div>
+
+    <h2>Recent gate activity</h2>
+    <table id="activityTable">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Room</th>
+          <th>Action</th>
+          <th>When</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <!-- html5-qrcode from a CDN: gives us camera scanning without any build tools. -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/security.js"></script>
+</body>
+</html>

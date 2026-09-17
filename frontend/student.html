@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student - Hostel Gatepass System</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🏠 Student Portal</h1>
+    <div class="user-chip">
+      <span id="userName"></span>
+      <button id="logoutButton" class="logout-button">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Apply for a gate pass</h2>
+    <div class="card">
+      <form id="applyForm">
+        <label for="reason">Reason</label>
+        <input id="reason" type="text" placeholder="e.g. Going home for the weekend" required />
+
+        <div class="form-row">
+          <div>
+            <label for="fromDateTime">Leaving at</label>
+            <input id="fromDateTime" type="datetime-local" required />
+          </div>
+          <div>
+            <label for="toDateTime">Returning at</label>
+            <input id="toDateTime" type="datetime-local" required />
+          </div>
+        </div>
+
+        <button type="submit">Submit request</button>
+        <p id="applyMessage" class="message"></p>
+      </form>
+    </div>
+
+    <h2>My gate passes</h2>
+    <div id="passList" class="pass-list"></div>
+  </main>
+
+  <!-- Big view of one pass with its QR code (hidden until needed). -->
+  <div id="qrDialog" class="card qr-holder" style="display: none; max-width: 420px; margin: 24px auto;">
+    <h3>Show this at the gate</h3>
+    <p id="qrTokenLabel" class="subtitle"></p>
+    <img id="qrImage" alt="Gate pass QR code" />
+    <p id="qrValidUntil" class="subtitle"></p>
+    <button class="secondary" onclick="document.getElementById('qrDialog').style.display='none'">Close</button>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/student.js"></script>
+</body>
+</html>

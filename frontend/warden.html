@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Warden - Hostel Gatepass System</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🧑‍💼 Warden Dashboard</h1>
+    <div class="user-chip">
+      <span id="userName"></span>
+      <button id="logoutButton" class="logout-button">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Pending requests</h2>
+    <div id="pendingList" class="pass-list"></div>
+
+    <h2>All requests</h2>
+    <table id="allTable">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Room</th>
+          <th>Reason</th>
+          <th>Leave</th>
+          <th>Return</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h2>Gate activity</h2>
+    <table id="activityTable">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Room</th>
+          <th>Action</th>
+          <th>When</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/warden.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Hostel Gatepass System</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="card login-box">
+    <div class="logo">🏠</div>
+    <h2 class="subtitle">Hostel Gatepass Verification System</h2>
+
+    <form id="loginForm">
+      <label for="loginId">ID</label>
+      <input id="loginId" type="text" placeholder="e.g. STU001" autocomplete="username" required />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Your password" autocomplete="current-password" required />
+
+      <button id="loginButton" type="submit">Log in</button>
+      <p id="loginMessage" class="message"></p>
+    </form>
+
+    <p class="empty-note">
+      Demo accounts: STU001 / student123 &nbsp;•&nbsp; WARDEN01 / warden123 &nbsp;•&nbsp; SEC01 / security123
+    </p>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>

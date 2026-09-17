@@ -1,0 +1,16 @@
+{
+  "name": "hostel-gatepass-system",
+  "version": "1.0.0",
+  "description": "Digital Hostel Gatepass Verification System - student applies, warden approves, security verifies the QR code",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "engines": {
+    "node": ">=23"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "qrcode": "^1.5.4"
+  }
+}

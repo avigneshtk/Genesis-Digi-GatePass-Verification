@@ -1,6 +1,6 @@
-build/
+node_modules/
 out/
+build/
 .m2/
 data/*.db
 *.class
-AGENTS.md

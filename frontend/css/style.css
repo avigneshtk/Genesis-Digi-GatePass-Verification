@@ -1,0 +1,303 @@
+/* One shared stylesheet for all pages. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f0f4f8;
+  color: #1f2933;
+  min-height: 100vh;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  background: #1f3a5f;
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+/* ---------- layout ---------- */
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.subtitle {
+  color: #52606d;
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin: 24px 0 12px;
+  font-size: 1.15rem;
+}
+
+/* ---------- cards and forms ---------- */
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(31, 58, 95, 0.12);
+}
+
+form label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3e4c59;
+  margin: 12px 0 4px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+  font: inherit;
+  background: #fbfdfe;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid #4a90d9;
+  border-color: #4a90d9;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row > div {
+  flex: 1;
+}
+
+/* ---------- buttons ---------- */
+
+button {
+  font: inherit;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  cursor: pointer;
+  background: #4a90d9;
+  color: white;
+  margin-top: 12px;
+}
+
+button:hover {
+  filter: brightness(1.08);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.approve {
+  background: #2f9e44;
+}
+
+.reject {
+  background: #e03131;
+}
+
+.secondary {
+  background: #627d98;
+}
+
+/* ---------- tables ---------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(31, 58, 95, 0.12);
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e4e9ef;
+}
+
+th {
+  background: #f5f8fb;
+  color: #3e4c59;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- status badges ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge.PENDING {
+  background: #fff3d6;
+  color: #8a6d00;
+}
+
+.badge.APPROVED {
+  background: #e3f5e8;
+  color: #1e7c34;
+}
+
+.badge.REJECTED {
+  background: #fde5e5;
+  color: #b02a2a;
+}
+
+.badge.EXPIRED {
+  background: #e6e9ec;
+  color: #52606d;
+}
+
+/* ---------- messages / results ---------- */
+
+.message {
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.message.error {
+  color: #b02a2a;
+}
+
+.message.success {
+  color: #1e7c34;
+}
+
+.result-box {
+  margin-top: 16px;
+  border-radius: 10px;
+  padding: 18px;
+  font-size: 1rem;
+}
+
+.result-box.valid {
+  background: #e3f5e8;
+  border: 2px solid #2f9e44;
+}
+
+.result-box.invalid {
+  background: #fde5e5;
+  border: 2px solid #e03131;
+}
+
+.result-box h3 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+/* ---------- login page ---------- */
+
+.login-box {
+  max-width: 380px;
+  margin: 8vh auto 0;
+  text-align: center;
+}
+
+.login-box .logo {
+  font-size: 2.6rem;
+}
+
+.login-box form {
+  text-align: left;
+}
+
+/* ---------- student page extras ---------- */
+
+.pass-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.pass-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(31, 58, 95, 0.12);
+}
+
+.pass-card .pass-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pass-card .reason {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.pass-card .times {
+  color: #52606d;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+/* ---------- misc ---------- */
+
+.qr-holder {
+  text-align: center;
+}
+
+.qr-holder img {
+  border: 8px solid white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(31, 58, 95, 0.2);
+}
+
+.empty-note {
+  color: #7b8794;
+  font-style: italic;
+}
+
+.logout-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 6px 12px;
+  margin-top: 0;
+}
