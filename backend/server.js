@@ -3,6 +3,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('node:path');
+const fs = require('node:fs');
 
 const { openDatabase } = require('./database');
 const authRoutes = require('./routes/auth');
@@ -78,8 +79,21 @@ async function createApp() {
   app.use('/api/gatepasses', gatePassRoutes({ db }));
   app.use('/api/security', securityRoutes({ db }));
 
-  // Serve static frontend files (works seamlessly when running monolith locally)
-  app.use(express.static(path.join(__dirname, '..', 'frontend')));
+  // Serve static frontend files (prefers built React app in dist/, falls back to frontend/)
+  const distDir = path.join(__dirname, '..', 'dist');
+  const frontendDir = path.join(__dirname, '..', 'frontend');
+  const staticDir = fs.existsSync(distDir) ? distDir : frontendDir;
+  app.use(express.static(staticDir));
+
+  // SPA fallback for non-API GET requests (Express 5 compatible)
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
+    const indexPath = path.join(staticDir, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      return res.sendFile(indexPath);
+    }
+    next();
+  });
 
   return { app, db };
 }

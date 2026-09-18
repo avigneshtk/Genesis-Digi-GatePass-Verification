@@ -1,0 +1,478 @@
+/* One shared stylesheet for all React pages - dark campus theme. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle, rgba(13, 17, 24, 0.78) 0%, rgba(13, 17, 24, 0.94) 100%),
+    url('/campus.jpg') no-repeat center center / cover fixed;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fullscreen Balanced Campus Background Layer */
+.bg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle, rgba(13, 17, 24, 0.6) 0%, rgba(13, 17, 24, 0.85) 100%),
+    url('/campus.jpg') no-repeat center center / cover;
+  filter: blur(2.5px) brightness(0.85);
+  transform: scale(1.02);
+  z-index: -1;
+}
+
+/* ---------- header / navbar ---------- */
+
+.navbar,
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  background-color: rgba(13, 17, 24, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.brand-logo span {
+  color: #eab308;
+}
+
+.topbar h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.logout-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
+  padding: 6px 12px;
+  margin-top: 0 !important;
+}
+
+.logout-button:hover {
+  background: #eab308 !important;
+  color: #0f141d !important;
+}
+
+/* ---------- layout ---------- */
+
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  flex-grow: 1;
+}
+
+.subtitle {
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin: 24px 0 12px;
+  font-size: 1.15rem;
+  color: #eab308;
+}
+
+/* ---------- cards / glassmorphism ---------- */
+
+.login-card {
+  background: rgba(18, 24, 38, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  width: 100%;
+  max-width: 440px;
+  padding: 36px 32px;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.card {
+  background: rgba(18, 24, 38, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+  margin-bottom: 20px;
+}
+
+.pass-card {
+  background: rgba(18, 24, 38, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+.card-title {
+  font-size: 1.8rem;
+  text-align: center;
+  color: #eab308;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+
+/* ---------- role selector tabs ---------- */
+
+.role-tabs {
+  display: flex;
+  background-color: rgba(13, 17, 24, 0.7);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.role-tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.role-tab.active {
+  background-color: #eab308;
+  color: #0f141d;
+}
+
+/* ---------- forms ---------- */
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label,
+form label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.form-control,
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: rgba(34, 45, 66, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  outline: none;
+  font: inherit;
+}
+
+.form-control:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #eab308;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.form-row > div {
+  flex: 1;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* ---------- buttons ---------- */
+
+button,
+.btn-submit {
+  font: inherit;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #0f141d;
+  font-weight: 700;
+  background-color: #eab308;
+  padding: 10px 16px;
+  margin-top: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+button:hover,
+.btn-submit:hover {
+  background-color: #ca8a04;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.approve {
+  background-color: #2f9e44;
+  color: #ffffff;
+}
+
+button.reject {
+  background-color: #e03131;
+  color: #ffffff;
+}
+
+.secondary,
+button.secondary {
+  background: #334155;
+  color: #ffffff;
+}
+
+.secondary:hover,
+button.secondary:hover {
+  background: #475569;
+}
+
+/* ---------- tables ---------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(18, 24, 38, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  overflow: hidden;
+  font-size: 0.92rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+  margin-bottom: 24px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+th {
+  background: rgba(23, 31, 46, 0.9);
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- status badges ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge.PENDING {
+  background: rgba(234, 179, 8, 0.2);
+  color: #eab308;
+}
+
+.badge.APPROVED {
+  background: rgba(47, 158, 68, 0.25);
+  color: #6ee7a0;
+}
+
+.badge.REJECTED {
+  background: rgba(224, 49, 49, 0.25);
+  color: #fca5a5;
+}
+
+.badge.EXPIRED {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+}
+
+/* ---------- messages / results ---------- */
+
+.message {
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.message.error {
+  color: #fca5a5;
+}
+
+.message.success {
+  color: #6ee7a0;
+}
+
+.result-box {
+  margin-top: 16px;
+  border-radius: 14px;
+  padding: 18px;
+  font-size: 1rem;
+  border: 2px solid;
+}
+
+.result-box.valid {
+  background: rgba(47, 158, 68, 0.2);
+  border-color: #2f9e44;
+}
+
+.result-box.invalid {
+  background: rgba(224, 49, 49, 0.2);
+  border-color: #e03131;
+}
+
+.result-box h3 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+/* ---------- card footers / modal ---------- */
+
+.card-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.88rem;
+  color: #94a3b8;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(13, 17, 24, 0.85);
+  margin-top: auto;
+}
+
+/* ---------- pass list ---------- */
+
+.pass-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pass-card .pass-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pass-card .reason {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.pass-card .times {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.qr-holder {
+  text-align: center;
+}
+
+.qr-holder img {
+  border: 8px solid rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  margin: 12px 0;
+  max-width: 100%;
+}
+
+.empty-note {
+  color: #94a3b8;
+  font-style: italic;
+  padding: 12px 0;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
