@@ -349,6 +349,17 @@ tr:last-child td {
   color: #6ee7a0;
 }
 
+.badge.OUT {
+  background: rgba(14, 165, 233, 0.25);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.4);
+}
+
+.badge.RETURNED {
+  background: rgba(168, 85, 247, 0.25);
+  color: #c084fc;
+}
+
 .badge.REJECTED {
   background: rgba(224, 49, 49, 0.25);
   color: #fca5a5;
@@ -357,6 +368,42 @@ tr:last-child td {
 .badge.EXPIRED {
   background: rgba(148, 163, 184, 0.2);
   color: #94a3b8;
+}
+
+.badge.EMERGENCY {
+  background: rgba(224, 49, 49, 0.25);
+  color: #ff6b6b;
+  border: 1px solid rgba(224, 49, 49, 0.45);
+}
+
+.badge.STUDENT {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.badge.WARDEN {
+  background: rgba(168, 85, 247, 0.2);
+  color: #d8b4fe;
+}
+
+.badge.SECURITY {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+}
+
+/* ---------- Emergency accents ---------- */
+
+.emergency-card {
+  border: 1px solid rgba(224, 49, 49, 0.45) !important;
+  box-shadow: 0 10px 30px rgba(224, 49, 49, 0.12) !important;
+}
+
+.emergency-border {
+  border-left: 4px solid #e03131 !important;
+}
+
+.emergency-btn:hover {
+  background-color: #c92a2a !important;
 }
 
 /* ---------- messages / results ---------- */
@@ -381,10 +428,21 @@ tr:last-child td {
   padding: 18px;
   font-size: 1rem;
   border: 2px solid;
+  transition: all 0.2s ease;
 }
 
 .result-box.valid {
   background: rgba(47, 158, 68, 0.2);
+  border-color: #2f9e44;
+}
+
+.result-box.exit-success {
+  background: rgba(234, 179, 8, 0.18);
+  border-color: #eab308;
+}
+
+.result-box.entry-success {
+  background: rgba(47, 158, 68, 0.22);
   border-color: #2f9e44;
 }
 
@@ -421,7 +479,7 @@ tr:last-child td {
 
 .pass-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -449,7 +507,7 @@ tr:last-child td {
 }
 
 .qr-holder img {
-  border: 8px solid rgba(255, 255, 255, 0.9);
+  border: 8px solid rgba(255, 255, 255, 0.95);
   border-radius: 8px;
   margin: 12px 0;
   max-width: 100%;
@@ -468,11 +526,59 @@ tr:last-child td {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   padding: 20px;
+}
+
+/* ---------- Mobile Responsiveness ---------- */
+
+@media (max-width: 640px) {
+  .navbar,
+  .topbar {
+    padding: 12px 16px;
+  }
+
+  .brand-logo {
+    font-size: 1.1rem;
+  }
+
+  .user-chip {
+    font-size: 0.8rem;
+    gap: 8px;
+  }
+
+  .main-container {
+    padding: 20px 12px;
+  }
+
+  .container {
+    padding: 16px 12px 36px;
+  }
+
+  .login-card {
+    padding: 24px 18px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pass-list {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    font-size: 0.84rem;
+  }
+
+  th, td {
+    padding: 8px 10px;
+  }
 }

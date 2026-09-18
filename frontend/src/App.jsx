@@ -4,13 +4,11 @@ import Login from './components/Login';
 import StudentDashboard from './components/StudentDashboard';
 import WardenDashboard from './components/WardenDashboard';
 import SecurityScanner from './components/SecurityScanner';
-import ConfigModal from './components/ConfigModal';
 import { api, setSessionToken } from './api';
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showConfig, setShowConfig] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -49,17 +47,10 @@ export default function App() {
 
   return (
     <>
-      <Navbar
-        user={user}
-        onLogout={handleLogout}
-        onOpenConfig={() => setShowConfig(true)}
-      />
+      <Navbar user={user} onLogout={handleLogout} />
 
       {!user && (
-        <Login
-          onLoginSuccess={(loggedInUser) => setUser(loggedInUser)}
-          onOpenConfig={() => setShowConfig(true)}
-        />
+        <Login onLoginSuccess={(loggedInUser) => setUser(loggedInUser)} />
       )}
 
       {user && user.role === 'STUDENT' && <StudentDashboard user={user} />}
@@ -67,10 +58,8 @@ export default function App() {
       {user && user.role === 'SECURITY' && <SecurityScanner />}
 
       <footer className="footer">
-        Digital Gate Pass Verification System &bull; Hackathon Edition
+        Digital GatePass Verification System &bull; Hackathon Edition
       </footer>
-
-      {showConfig && <ConfigModal onClose={() => setShowConfig(false)} />}
     </>
   );
 }

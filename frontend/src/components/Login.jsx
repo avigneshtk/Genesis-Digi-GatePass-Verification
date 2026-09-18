@@ -1,50 +1,28 @@
 import React, { useState } from 'react';
-import { api, getApiBaseUrl } from '../api';
+import { api } from '../api';
 
-const roleDefaults = {
-  student: {
-    label: 'Student Registration No / ID',
-    placeholder: 'e.g. STU001',
-    loginId: 'STU001',
-    password: 'student123',
-    buttonText: 'Login as Student',
-  },
-  warden: {
-    label: 'Warden Employee ID',
-    placeholder: 'e.g. WARDEN01',
-    loginId: 'WARDEN01',
-    password: 'warden123',
-    buttonText: 'Login as Warden',
-  },
-  security: {
-    label: 'Gate Security ID',
-    placeholder: 'e.g. SEC01',
-    loginId: 'SEC01',
-    password: 'security123',
-    buttonText: 'Login as Security',
-  },
-};
+const demoAccounts = [
+  { label: '👨‍🎓 Student (STU001)', id: 'STU001', pass: 'student123' },
+  { label: '👨‍🏫 Warden (WARDEN01)', id: 'WARDEN01', pass: 'warden123' },
+  { label: '🛡️ Security (SEC01)', id: 'SEC01', pass: 'security123' },
+];
 
-export default function Login({ onLoginSuccess, onOpenConfig }) {
-  const [role, setRole] = useState('student');
-  const [loginId, setLoginId] = useState(roleDefaults.student.loginId);
-  const [password, setPassword] = useState(roleDefaults.student.password);
+export default function Login({ onLoginSuccess }) {
+  const [loginId, setLoginId] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const currentRoleConfig = roleDefaults[role];
-
-  const handleRoleChange = (newRole) => {
-    setRole(newRole);
-    setLoginId(roleDefaults[newRole].loginId);
-    setPassword(roleDefaults[newRole].password);
+  const handleQuickFill = (id, pass) => {
+    setLoginId(id);
+    setPassword(pass);
     setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!loginId || !password) {
-      setError('Please enter your ID and password.');
+    if (!loginId.trim() || !password) {
+      setError('Please enter your Username / ID and password.');
       return;
     }
 
@@ -54,8 +32,9 @@ export default function Login({ onLoginSuccess, onOpenConfig }) {
     try {
       const data = await api('/api/auth/login', {
         method: 'POST',
-        body: { loginId, password },
+        body: { loginId: loginId.trim(), password },
       });
+      // The backend response determines the role (STUDENT / WARDEN / SECURITY)
       onLoginSuccess(data.user);
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
@@ -64,49 +43,30 @@ export default function Login({ onLoginSuccess, onOpenConfig }) {
     }
   };
 
-  const apiBase = getApiBaseUrl();
-
   return (
     <div className="main-container">
       <div className="bg-overlay"></div>
 
       <div className="login-card">
-        <h1 className="card-title">Digital Gate Pass</h1>
-
-        <div className="role-tabs">
-          <button
-            type="button"
-            className={`role-tab ${role === 'student' ? 'active' : ''}`}
-            onClick={() => handleRoleChange('student')}
-          >
-            Student
-          </button>
-          <button
-            type="button"
-            className={`role-tab ${role === 'warden' ? 'active' : ''}`}
-            onClick={() => handleRoleChange('warden')}
-          >
-            Warden
-          </button>
-          <button
-            type="button"
-            className={`role-tab ${role === 'security' ? 'active' : ''}`}
-            onClick={() => handleRoleChange('security')}
-          >
-            Security
-          </button>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: 6 }}>🏠</div>
+          <h1 className="card-title" style={{ marginBottom: 4 }}>DIGITAL GATEPASS</h1>
+          <p className="subtitle" style={{ fontSize: '0.88rem', margin: 0 }}>
+            Unified Digital GatePass Verification Portal
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="loginId">{currentRoleConfig.label}</label>
+            <label htmlFor="loginId">Username / ID</label>
             <input
               id="loginId"
               type="text"
               className="form-control"
-              placeholder={currentRoleConfig.placeholder}
+              placeholder="e.g. STU001, WARDEN01, or SEC01"
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
+              autoComplete="username"
               required
             />
           </div>
@@ -120,26 +80,43 @@ export default function Login({ onLoginSuccess, onOpenConfig }) {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               required
             />
           </div>
 
           <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? 'Logging in...' : currentRoleConfig.buttonText}
+            {loading ? 'Verifying credentials...' : 'LOGIN'}
           </button>
 
           {error && <p className="message error">{error}</p>}
         </form>
 
-        <div className="card-footer">
-          <div>
-            Demo logins: STU001 / student123 &bull; WARDEN01 / warden123 &bull; SEC01 / security123
-          </div>
-          <div style={{ marginTop: 12, fontSize: '0.8rem', opacity: 0.8 }}>
-            API: {apiBase ? apiBase : 'Local / Proxy'} &bull;{' '}
-            <a href="#configure" onClick={(e) => { e.preventDefault(); onOpenConfig(); }}>
-              Configure Backend
-            </a>
+        <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: 10, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Quick Demo Logins
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {demoAccounts.map((acc) => (
+              <button
+                key={acc.id}
+                type="button"
+                className="secondary"
+                style={{
+                  fontSize: '0.82rem',
+                  padding: '7px 12px',
+                  textAlign: 'left',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: 0,
+                }}
+                onClick={() => handleQuickFill(acc.id, acc.pass)}
+              >
+                <span>{acc.label}</span>
+                <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>Fill</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>

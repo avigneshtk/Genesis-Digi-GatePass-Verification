@@ -80,9 +80,12 @@ async function openDatabase() {
     CREATE TABLE IF NOT EXISTS gate_passes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       studentId INTEGER NOT NULL,
+      type TEXT NOT NULL DEFAULT 'NORMAL',
       reason TEXT NOT NULL,
+      destination TEXT,
       fromDateTime TEXT NOT NULL,
       toDateTime TEXT NOT NULL,
+      description TEXT,
       status TEXT NOT NULL DEFAULT 'PENDING',
       qrToken TEXT
     );
@@ -101,6 +104,23 @@ async function openDatabase() {
       createdAt TEXT NOT NULL
     );
   `);
+
+  // Migrate existing tables if they lack the new columns
+  try {
+    const tableInfo = await db.all('PRAGMA table_info(gate_passes)');
+    const colNames = tableInfo.map((c) => c.name);
+    if (!colNames.includes('type')) {
+      await db.exec("ALTER TABLE gate_passes ADD COLUMN type TEXT NOT NULL DEFAULT 'NORMAL'");
+    }
+    if (!colNames.includes('destination')) {
+      await db.exec('ALTER TABLE gate_passes ADD COLUMN destination TEXT');
+    }
+    if (!colNames.includes('description')) {
+      await db.exec('ALTER TABLE gate_passes ADD COLUMN description TEXT');
+    }
+  } catch (migErr) {
+    console.warn('[Database] Migration note:', migErr.message);
+  }
 
   await seedDemoUsers(db);
   return db;
