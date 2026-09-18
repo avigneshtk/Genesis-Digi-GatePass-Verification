@@ -4,14 +4,12 @@ export function getApiBaseUrl() {
   return window.API_BASE_URL || localStorage.getItem('API_BASE_URL') || '';
 }
 
-export function setApiBaseUrl(url) {
-  if (url) {
-    localStorage.setItem('API_BASE_URL', url.trim().replace(/\/+$/, ''));
-  } else {
-    localStorage.removeItem('API_BASE_URL');
-  }
+export function getApiBaseUrl() {
+  return import.meta.env.VITE_API_BASE_URL ||
+         window.API_BASE_URL ||
+         localStorage.getItem('API_BASE_URL') ||
+         '';
 }
-
 export function getApiUrl(path) {
   const base = getApiBaseUrl();
   if (!base || path.startsWith('http')) return path;
