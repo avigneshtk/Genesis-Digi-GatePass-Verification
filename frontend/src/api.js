@@ -1,19 +1,23 @@
+
 // API client for the React frontend
 
 export function getApiBaseUrl() {
-  return window.API_BASE_URL || localStorage.getItem('API_BASE_URL') || '';
+  return (
+    import.meta.env.VITE_API_BASE_URL ||
+    window.API_BASE_URL ||
+    localStorage.getItem('API_BASE_URL') ||
+    ''
+  );
 }
 
-export function getApiBaseUrl() {
-  return import.meta.env.VITE_API_BASE_URL ||
-         window.API_BASE_URL ||
-         localStorage.getItem('API_BASE_URL') ||
-         '';
-}
 export function getApiUrl(path) {
   const base = getApiBaseUrl();
-  if (!base || path.startsWith('http')) return path;
-  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+
+  if (!base || path.startsWith('http')) {
+    return path;
+  }
+
+  return base.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
 }
 
 export function getSessionToken() {
@@ -38,7 +42,7 @@ export async function api(path, options = {}) {
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers['Authorization'] = 'Bearer ' + token;
   }
 
   const response = await fetch(fullUrl, {
@@ -49,8 +53,11 @@ export async function api(path, options = {}) {
   });
 
   const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
-    throw new Error(data.error || 'Something went wrong. Please try again.');
+    throw new Error(
+      data.error || 'Something went wrong. Please try again.'
+    );
   }
 
   if (data && data.token) {
@@ -61,8 +68,12 @@ export async function api(path, options = {}) {
 }
 
 export function formatDateTime(isoString) {
-  if (!isoString) return '-';
+  if (!isoString) {
+    return '-';
+  }
+
   const date = new Date(isoString);
+
   return date.toLocaleString(undefined, {
     day: 'numeric',
     month: 'short',
@@ -71,3 +82,4 @@ export function formatDateTime(isoString) {
     minute: '2-digit',
   });
 }
+
