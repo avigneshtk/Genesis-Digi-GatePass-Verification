@@ -82,6 +82,47 @@ async function loadPasses() {
     const statusCell = document.createElement('td');
     statusCell.appendChild(statusBadge(pass.status));
     row.appendChild(statusCell);
+
+    const actionCell = document.createElement('td');
+    if (pass.status === 'APPROVED' || pass.status === 'REJECTED') {
+      const isApproved = pass.status === 'APPROVED';
+      const switchBtn = document.createElement('button');
+      switchBtn.textContent = isApproved ? 'Reject' : 'Approve';
+      switchBtn.className = isApproved ? 'reject' : 'approve';
+      switchBtn.style.padding = '4px 10px';
+      switchBtn.style.fontSize = '0.8rem';
+      let switchTimeout = null;
+      switchBtn.addEventListener('click', async () => {
+        if (switchBtn.dataset.confirming === 'true') {
+          clearTimeout(switchTimeout);
+          switchBtn.textContent = 'Updating...';
+          switchBtn.disabled = true;
+          try {
+            await api(`/api/gatepasses/${pass.id}/switch-status`, {
+              method: 'POST',
+              body: { targetStatus: isApproved ? 'REJECTED' : 'APPROVED' },
+            });
+            loadPasses();
+            loadActivity();
+          } catch (err) {
+            console.error(err);
+            loadPasses();
+          }
+        } else {
+          switchBtn.dataset.confirming = 'true';
+          switchBtn.textContent = 'Click again to confirm';
+          switchBtn.classList.add('btn-confirming');
+          switchTimeout = setTimeout(() => {
+            switchBtn.dataset.confirming = 'false';
+            switchBtn.textContent = isApproved ? 'Reject' : 'Approve';
+            switchBtn.classList.remove('btn-confirming');
+          }, 3000);
+        }
+      });
+      actionCell.appendChild(switchBtn);
+    }
+    row.appendChild(actionCell);
+
     tableBody.appendChild(row);
   }
 }

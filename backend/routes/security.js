@@ -25,6 +25,14 @@ module.exports = function securityRoutes({ db }) {
       qrToken: pass.qrToken,
     };
 
+    if (pass.status === 'CANCELLED') {
+      return {
+        valid: false,
+        status: pass.status,
+        reason: 'This gate pass has been cancelled by the student.',
+        pass: passInfo,
+      };
+    }
     if (pass.status === 'PENDING') {
       return {
         valid: false,
@@ -133,6 +141,9 @@ module.exports = function securityRoutes({ db }) {
 
       if (!pass) return res.status(404).json({ error: 'Gate pass not found.' });
 
+      if (pass.status === 'CANCELLED') {
+        return res.status(400).json({ error: 'Cannot record action: gate pass has been CANCELLED.' });
+      }
       if (pass.status === 'PENDING') {
         return res.status(400).json({ error: 'Cannot record action: pass is still PENDING warden approval.' });
       }

@@ -96,18 +96,105 @@ module.exports = function gatePassRoutes({ db }) {
     }
   });
 
+  // POST /api/gatepasses/:id/cancel   (student only, own pass)
+  // Student cancels their pending or approved gate pass.
+  router.post('/:id/cancel', requireRole('STUDENT'), async (req, res) => {
+    try {
+      const pass = await db.get('SELECT * FROM gate_passes WHERE id = ?', [req.params.id]);
+      if (!pass) return res.status(404).json({ error: 'Gate pass not found.' });
+
+      if (pass.studentId !== req.user.id) {
+        return res.status(403).json({ error: 'Not authorized to cancel this gate pass.' });
+      }
+
+      if (pass.status !== 'PENDING' && pass.status !== 'APPROVED') {
+        return res.status(400).json({
+          error: `Cannot cancel gate pass with status ${pass.status}. Only PENDING or APPROVED passes can be cancelled.`,
+        });
+      }
+
+      const now = new Date().toISOString();
+      await db.run("UPDATE gate_passes SET status = 'CANCELLED' WHERE id = ?", [pass.id]);
+      await db.run(
+        'INSERT INTO gate_logs (gatePassId, studentId, action, timestamp) VALUES (?, ?, ?, ?)',
+        [pass.id, pass.studentId, 'CANCELLED', now]
+      );
+
+      const updated = await db.get('SELECT * FROM gate_passes WHERE id = ?', [pass.id]);
+      res.json({ success: true, pass: await passWithStudent(updated) });
+    } catch (err) {
+      console.error('Cancel pass error:', err);
+      res.status(500).json({ error: 'Failed to cancel gate pass.' });
+    }
+  });
+
+  // POST /api/gatepasses/:id/switch-status   (warden only)
+  // Changes an APPROVED pass to REJECTED or a REJECTED pass to APPROVED.
+  router.post('/:id/switch-status', requireRole('WARDEN'), async (req, res) => {
+    try {
+      const pass = await db.get('SELECT * FROM gate_passes WHERE id = ?', [req.params.id]);
+      if (!pass) return res.status(404).json({ error: 'Gate pass not found.' });
+
+      if (pass.status !== 'APPROVED' && pass.status !== 'REJECTED') {
+        return res.status(400).json({
+          error: `Cannot change status of pass with status ${pass.status}. Only APPROVED <-> REJECTED transitions are permitted.`,
+        });
+      }
+
+      const targetStatus = (req.body && req.body.targetStatus) || (pass.status === 'APPROVED' ? 'REJECTED' : 'APPROVED');
+
+      if (pass.status === 'APPROVED' && targetStatus !== 'REJECTED') {
+        return res.status(400).json({ error: 'APPROVED pass can only be changed to REJECTED.' });
+      }
+      if (pass.status === 'REJECTED' && targetStatus !== 'APPROVED') {
+        return res.status(400).json({ error: 'REJECTED pass can only be changed to APPROVED.' });
+      }
+
+      const now = new Date().toISOString();
+      if (targetStatus === 'APPROVED') {
+        const qrToken = pass.qrToken || ('GP-' + crypto.randomBytes(4).toString('hex').toUpperCase());
+        await db.run("UPDATE gate_passes SET status = 'APPROVED', qrToken = ? WHERE id = ?", [qrToken, pass.id]);
+        await db.run(
+          'INSERT INTO gate_logs (gatePassId, studentId, action, timestamp) VALUES (?, ?, ?, ?)',
+          [pass.id, pass.studentId, 'APPROVED', now]
+        );
+      } else {
+        await db.run("UPDATE gate_passes SET status = 'REJECTED' WHERE id = ?", [pass.id]);
+        await db.run(
+          'INSERT INTO gate_logs (gatePassId, studentId, action, timestamp) VALUES (?, ?, ?, ?)',
+          [pass.id, pass.studentId, 'REJECTED', now]
+        );
+      }
+
+      const updated = await db.get('SELECT * FROM gate_passes WHERE id = ?', [pass.id]);
+      res.json({ success: true, pass: await passWithStudent(updated) });
+    } catch (err) {
+      console.error('Switch status error:', err);
+      res.status(500).json({ error: 'Failed to switch pass status.' });
+    }
+  });
+
   // POST /api/gatepasses/:id/approve   (warden only)
+  // Approves a PENDING pass or switches a REJECTED pass to APPROVED.
   router.post('/:id/approve', requireRole('WARDEN'), async (req, res) => {
     try {
       const pass = await db.get('SELECT * FROM gate_passes WHERE id = ?', [req.params.id]);
       if (!pass) return res.status(404).json({ error: 'Gate pass not found.' });
-      if (pass.status !== 'PENDING') {
-        return res.status(400).json({ error: 'Only pending passes can be approved.' });
+      if (pass.status !== 'PENDING' && pass.status !== 'REJECTED') {
+        return res.status(400).json({ error: `Cannot approve pass with status ${pass.status}. Only PENDING or REJECTED passes can be approved.` });
       }
 
       // The QR code contains only this random token - never any personal data.
-      const qrToken = 'GP-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+      const qrToken = pass.qrToken || ('GP-' + crypto.randomBytes(4).toString('hex').toUpperCase());
       await db.run("UPDATE gate_passes SET status = 'APPROVED', qrToken = ? WHERE id = ?", [qrToken, pass.id]);
+
+      // If transitioning from REJECTED -> APPROVED, record in gate_logs
+      if (pass.status === 'REJECTED') {
+        await db.run(
+          'INSERT INTO gate_logs (gatePassId, studentId, action, timestamp) VALUES (?, ?, ?, ?)',
+          [pass.id, pass.studentId, 'APPROVED', new Date().toISOString()]
+        );
+      }
 
       const updated = await db.get('SELECT * FROM gate_passes WHERE id = ?', [pass.id]);
       res.json({ pass: await passWithStudent(updated) });
@@ -118,15 +205,25 @@ module.exports = function gatePassRoutes({ db }) {
   });
 
   // POST /api/gatepasses/:id/reject   (warden only)
+  // Rejects a PENDING pass or switches an APPROVED pass to REJECTED.
   router.post('/:id/reject', requireRole('WARDEN'), async (req, res) => {
     try {
       const pass = await db.get('SELECT * FROM gate_passes WHERE id = ?', [req.params.id]);
       if (!pass) return res.status(404).json({ error: 'Gate pass not found.' });
-      if (pass.status !== 'PENDING') {
-        return res.status(400).json({ error: 'Only pending passes can be rejected.' });
+      if (pass.status !== 'PENDING' && pass.status !== 'APPROVED') {
+        return res.status(400).json({ error: `Cannot reject pass with status ${pass.status}. Only PENDING or APPROVED passes can be rejected.` });
       }
 
       await db.run("UPDATE gate_passes SET status = 'REJECTED' WHERE id = ?", [pass.id]);
+
+      // If transitioning from APPROVED -> REJECTED, record in gate_logs
+      if (pass.status === 'APPROVED') {
+        await db.run(
+          'INSERT INTO gate_logs (gatePassId, studentId, action, timestamp) VALUES (?, ?, ?, ?)',
+          [pass.id, pass.studentId, 'REJECTED', new Date().toISOString()]
+        );
+      }
+
       const updated = await db.get('SELECT * FROM gate_passes WHERE id = ?', [pass.id]);
       res.json({ pass: await passWithStudent(updated) });
     } catch (err) {

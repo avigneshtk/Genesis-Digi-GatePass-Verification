@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api, formatDateTime } from '../api';
 
 export default function WardenDashboard() {
@@ -9,6 +9,8 @@ export default function WardenDashboard() {
   const [showAcceptAllModal, setShowAcceptAllModal] = useState(false);
   const [acceptAllLoading, setAcceptAllLoading] = useState(false);
   const [actionFeedback, setActionFeedback] = useState({ text: '', type: '' });
+  const [confirmingSwitch, setConfirmingSwitch] = useState(null); // { passId, targetStatus }
+  const confirmTimerRef = useRef(null);
 
   const loadData = async () => {
     try {
@@ -26,8 +28,46 @@ export default function WardenDashboard() {
   useEffect(() => {
     loadData();
     const interval = setInterval(loadData, 10000); // refresh periodically
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (confirmTimerRef.current) {
+        clearTimeout(confirmTimerRef.current);
+      }
+    };
   }, []);
+
+  const handleSwitchClick = async (pass, targetStatus) => {
+    // If the button was clicked once already for this pass and target status, this is click #2:
+    if (confirmingSwitch && confirmingSwitch.passId === pass.id && confirmingSwitch.targetStatus === targetStatus) {
+      if (confirmTimerRef.current) {
+        clearTimeout(confirmTimerRef.current);
+        confirmTimerRef.current = null;
+      }
+      setConfirmingSwitch(null);
+      setProcessingId(pass.id);
+      try {
+        await api(`/api/gatepasses/${pass.id}/switch-status`, {
+          method: 'POST',
+          body: { targetStatus },
+        });
+        await loadData();
+      } catch (err) {
+        console.error('Failed to switch gate pass status:', err);
+      } finally {
+        setProcessingId(null);
+      }
+    } else {
+      // First click!
+      if (confirmTimerRef.current) {
+        clearTimeout(confirmTimerRef.current);
+      }
+      setConfirmingSwitch({ passId: pass.id, targetStatus });
+      confirmTimerRef.current = setTimeout(() => {
+        setConfirmingSwitch(null);
+        confirmTimerRef.current = null;
+      }, 3000);
+    }
+  };
 
   const handleDecision = async (passId, decision) => {
     setProcessingId(passId);
@@ -290,6 +330,42 @@ export default function WardenDashboard() {
                     </button>
                   </div>
                 )}
+
+                {pass.status === 'APPROVED' && (
+                  <div style={{ marginTop: 12 }}>
+                    <button
+                      type="button"
+                      className={`reject ${confirmingSwitch?.passId === pass.id && confirmingSwitch?.targetStatus === 'REJECTED' ? 'btn-confirming' : ''}`}
+                      style={{ width: '100%' }}
+                      disabled={processingId === pass.id}
+                      onClick={() => handleSwitchClick(pass, 'REJECTED')}
+                    >
+                      {processingId === pass.id
+                        ? 'Updating...'
+                        : confirmingSwitch?.passId === pass.id && confirmingSwitch?.targetStatus === 'REJECTED'
+                        ? 'Click again to confirm'
+                        : 'Reject'}
+                    </button>
+                  </div>
+                )}
+
+                {pass.status === 'REJECTED' && (
+                  <div style={{ marginTop: 12 }}>
+                    <button
+                      type="button"
+                      className={`approve ${confirmingSwitch?.passId === pass.id && confirmingSwitch?.targetStatus === 'APPROVED' ? 'btn-confirming' : ''}`}
+                      style={{ width: '100%' }}
+                      disabled={processingId === pass.id}
+                      onClick={() => handleSwitchClick(pass, 'APPROVED')}
+                    >
+                      {processingId === pass.id
+                        ? 'Updating...'
+                        : confirmingSwitch?.passId === pass.id && confirmingSwitch?.targetStatus === 'APPROVED'
+                        ? 'Click again to confirm'
+                        : 'Approve'}
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -313,31 +389,46 @@ export default function WardenDashboard() {
               </tr>
             </thead>
             <tbody>
-              {activity.map((log) => (
-                <tr key={log.id}>
-                  <td>{log.studentName}</td>
-                  <td>{log.roomNumber || '-'}</td>
-                  <td>
-                    {log.passType === 'EMERGENCY' ? (
-                      <span className="badge EMERGENCY" style={{ fontSize: '0.7rem' }}>🚨 EMERGENCY</span>
-                    ) : (
-                      <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Normal</span>
-                    )}
-                  </td>
-                  <td>
-                    <span
-                      className="badge"
-                      style={{
-                        backgroundColor: log.action === 'ENTRY' ? 'rgba(47, 158, 68, 0.25)' : 'rgba(234, 179, 8, 0.25)',
-                        color: log.action === 'ENTRY' ? '#6ee7a0' : '#eab308',
-                      }}
-                    >
-                      {log.action}
-                    </span>
-                  </td>
-                  <td>{formatDateTime(log.timestamp)}</td>
-                </tr>
-              ))}
+              {activity.map((log) => {
+                const getLogBadgeStyle = (act) => {
+                  switch (act) {
+                    case 'ENTRY':
+                    case 'APPROVED':
+                      return { backgroundColor: 'rgba(47, 158, 68, 0.25)', color: '#6ee7a0' };
+                    case 'EXIT':
+                      return { backgroundColor: 'rgba(234, 179, 8, 0.25)', color: '#eab308' };
+                    case 'REJECTED':
+                      return { backgroundColor: 'rgba(224, 49, 49, 0.25)', color: '#fca5a5' };
+                    case 'CANCELLED':
+                      return { backgroundColor: 'rgba(148, 163, 184, 0.25)', color: '#cbd5e1' };
+                    default:
+                      return { backgroundColor: 'rgba(148, 163, 184, 0.2)', color: '#94a3b8' };
+                  }
+                };
+
+                return (
+                  <tr key={log.id}>
+                    <td>{log.studentName}</td>
+                    <td>{log.roomNumber || '-'}</td>
+                    <td>
+                      {log.passType === 'EMERGENCY' ? (
+                        <span className="badge EMERGENCY" style={{ fontSize: '0.7rem' }}>🚨 EMERGENCY</span>
+                      ) : (
+                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Normal</span>
+                      )}
+                    </td>
+                    <td>
+                      <span
+                        className="badge"
+                        style={getLogBadgeStyle(log.action)}
+                      >
+                        {log.action}
+                      </span>
+                    </td>
+                    <td>{formatDateTime(log.timestamp)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

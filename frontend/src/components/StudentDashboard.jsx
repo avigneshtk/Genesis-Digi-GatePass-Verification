@@ -12,6 +12,8 @@ export default function StudentDashboard({ user }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [activeQrPass, setActiveQrPass] = useState(null);
+  const [cancelModalPass, setCancelModalPass] = useState(null);
+  const [cancellingId, setCancellingId] = useState(null);
 
   const loadPasses = async () => {
     try {
@@ -19,6 +21,22 @@ export default function StudentDashboard({ user }) {
       setPasses(data.passes || []);
     } catch (err) {
       console.error('Failed to load passes:', err);
+    }
+  };
+
+  const handleCancelPass = async (passId) => {
+    setCancellingId(passId);
+    try {
+      await api(`/api/gatepasses/${passId}/cancel`, { method: 'POST' });
+      setCancelModalPass(null);
+      if (activeQrPass && activeQrPass.id === passId) {
+        setActiveQrPass(null);
+      }
+      await loadPasses();
+    } catch (err) {
+      alert(err.message || 'Failed to cancel gate pass.');
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -168,6 +186,16 @@ export default function StudentDashboard({ user }) {
             >
               📥 Download
             </button>
+            {activePass.status === 'APPROVED' && (
+              <button
+                type="button"
+                className="secondary"
+                style={{ margin: 0, padding: '8px 14px', borderColor: '#e03131', color: '#fca5a5' }}
+                onClick={() => setCancelModalPass(activePass)}
+              >
+                Cancel Pass
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -323,6 +351,7 @@ export default function StudentDashboard({ user }) {
             const displayStatus = getDisplayStatus(pass);
             const isEmergency = pass.type === 'EMERGENCY';
             const isApproved = pass.status === 'APPROVED' || pass.status === 'OUT' || pass.status === 'RETURNED';
+            const canCancel = pass.status === 'PENDING' || pass.status === 'APPROVED';
 
             return (
               <div
@@ -378,6 +407,25 @@ export default function StudentDashboard({ user }) {
                       onClick={() => handleDownloadQr(pass)}
                     >
                       📥
+                    </button>
+                  </div>
+                )}
+
+                {canCancel && (
+                  <div style={{ marginTop: 8 }}>
+                    <button
+                      type="button"
+                      className="secondary"
+                      style={{
+                        width: '100%',
+                        borderColor: '#e03131',
+                        color: '#fca5a5',
+                        padding: '8px 12px',
+                        fontSize: '0.88rem',
+                      }}
+                      onClick={() => setCancelModalPass(pass)}
+                    >
+                      Cancel GatePass
                     </button>
                   </div>
                 )}
@@ -440,6 +488,43 @@ export default function StudentDashboard({ user }) {
                 onClick={() => setActiveQrPass(null)}
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {cancelModalPass && (
+        <div className="modal-overlay" onClick={() => setCancelModalPass(null)}>
+          <div
+            className="card"
+            style={{ maxWidth: 420, width: '100%', textAlign: 'center' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontSize: '2rem', marginBottom: 8 }}>⚠️</div>
+            <h3 style={{ color: '#eab308', marginBottom: 12 }}>Cancel Gate Pass</h3>
+            <p style={{ fontSize: '0.95rem', marginBottom: 16, color: '#cbd5e1' }}>
+              Are you sure you want to cancel Gate Pass <strong>#{cancelModalPass.id}</strong> ({cancelModalPass.reason})?
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                className="reject"
+                style={{ flex: 1 }}
+                disabled={cancellingId === cancelModalPass.id}
+                onClick={() => handleCancelPass(cancelModalPass.id)}
+              >
+                {cancellingId === cancelModalPass.id ? 'Cancelling...' : 'Yes, Cancel Pass'}
+              </button>
+              <button
+                type="button"
+                className="secondary"
+                style={{ flex: 1 }}
+                disabled={cancellingId === cancelModalPass.id}
+                onClick={() => setCancelModalPass(null)}
+              >
+                Keep Pass
               </button>
             </div>
           </div>

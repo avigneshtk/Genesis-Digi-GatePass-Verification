@@ -84,6 +84,26 @@ async function loadPasses() {
       card.appendChild(token);
     }
 
+    if (pass.status === 'PENDING' || pass.status === 'APPROVED') {
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = 'Cancel GatePass';
+      cancelButton.className = 'secondary';
+      cancelButton.style.borderColor = '#e03131';
+      cancelButton.style.color = '#fca5a5';
+      cancelButton.style.width = '100%';
+      cancelButton.addEventListener('click', async () => {
+        if (confirm(`Are you sure you want to cancel GatePass #${pass.id}?`)) {
+          try {
+            await api(`/api/gatepasses/${pass.id}/cancel`, { method: 'POST' });
+            loadPasses();
+          } catch (err) {
+            alert(err.message || 'Failed to cancel pass.');
+          }
+        }
+      });
+      card.appendChild(cancelButton);
+    }
+
     list.appendChild(card);
   }
 }

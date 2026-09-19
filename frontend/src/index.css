@@ -370,6 +370,30 @@ tr:last-child td {
   color: #94a3b8;
 }
 
+.badge.CANCELLED {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.btn-confirming {
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.6) !important;
+  font-weight: 800 !important;
+  animation: pulseConfirm 1.2s ease-in-out infinite;
+}
+
+@keyframes pulseConfirm {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.8);
+  }
+}
+
 .badge.EMERGENCY {
   background: rgba(224, 49, 49, 0.25);
   color: #ff6b6b;
