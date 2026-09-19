@@ -74,31 +74,6 @@ The platform connects **students, wardens, and security personnel** through an i
 
 ---
 
-## 🔑 Demo Accounts
-
-The database comes pre-seeded with sample accounts for all three roles:
-
-| Role | Login ID | Password | Name | Details |
-| :--- | :--- | :--- | :--- | :--- |
-| **Student** | `STU001` | `student123` | Rahul | Room B-204 |
-| **Student** | `STU002` | `student123` | Priya | Room A-101 |
-| **Warden** | `WARDEN01` | `warden123` | Mr. Sharma | Hostel Supervisor |
-| **Security** | `SEC01` | `security123` | Gate Security | Main Gate Terminal |
-
----
-
-## ⚡ Performance & Engineering Highlights
-
-* **Sub-Second LCP (< 0.5s)**: Non-blocking initial view render with high-priority image preloading (`fetchpriority="high"`), ensuring the landing page paints instantaneously.
-* **Code-Splitting with Lazy Loading**: Role dashboards are code-split using `React.lazy()` and `Suspense`, trimming the initial JavaScript payload by over 60% (~71 KB gzip).
-* **High-Efficiency Database Access**:
-  * Single-query SQL joins for session validation and pass retrieval, completely eliminating N+1 query loops.
-  * Explicit indexes on `studentId`, `status`, `qrToken`, and gate logs for microsecond lookup latency.
-* **In-Flight Auth Request Deduplication**: Shared promise caching eliminates duplicate `/auth/me` network requests on application initialization.
-* **Zero External Native Dependencies**: Built on pure Node.js APIs and modern web standards.
-
----
-
 ## 🛠️ Technology Stack
 
 ### Frontend
