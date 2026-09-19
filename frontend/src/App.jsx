@@ -1,27 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
-import StudentDashboard from './components/StudentDashboard';
-import WardenDashboard from './components/WardenDashboard';
-import SecurityScanner from './components/SecurityScanner';
-import { api, setSessionToken } from './api';
+import { api, setSessionToken, getCurrentUser, setCurrentUser } from './api';
+
+const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
+const WardenDashboard = lazy(() => import('./components/WardenDashboard'));
+const SecurityScanner = lazy(() => import('./components/SecurityScanner'));
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const data = await api('/api/auth/me');
-        setUser(data.user);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
+    let isMounted = true;
+    getCurrentUser().then((userData) => {
+      if (isMounted && userData) {
+        setUser(userData);
       }
+    });
+    return () => {
+      isMounted = false;
     };
-    checkAuth();
   }, []);
 
   const handleLogout = async () => {
@@ -31,31 +29,35 @@ export default function App() {
       console.warn('Logout error:', err);
     } finally {
       setSessionToken(null);
+      setCurrentUser(null);
       setUser(null);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="main-container">
-        <p className="subtitle" style={{ fontSize: '1.2rem', color: '#eab308' }}>
-          Loading Digital GatePass...
-        </p>
-      </div>
-    );
-  }
+  const handleLoginSuccess = (loggedInUser) => {
+    setCurrentUser(loggedInUser);
+    setUser(loggedInUser);
+  };
 
   return (
     <>
       <Navbar user={user} onLogout={handleLogout} />
 
-      {!user && (
-        <Login onLoginSuccess={(loggedInUser) => setUser(loggedInUser)} />
-      )}
+      {!user && <Login onLoginSuccess={handleLoginSuccess} />}
 
-      {user && user.role === 'STUDENT' && <StudentDashboard user={user} />}
-      {user && user.role === 'WARDEN' && <WardenDashboard />}
-      {user && user.role === 'SECURITY' && <SecurityScanner />}
+      <Suspense
+        fallback={
+          <div className="main-container">
+            <p className="subtitle" style={{ fontSize: '1.2rem', color: '#eab308' }}>
+              Loading Dashboard...
+            </p>
+          </div>
+        }
+      >
+        {user && user.role === 'STUDENT' && <StudentDashboard user={user} />}
+        {user && user.role === 'WARDEN' && <WardenDashboard user={user} />}
+        {user && user.role === 'SECURITY' && <SecurityScanner user={user} />}
+      </Suspense>
 
       <footer className="footer">
         Digital GatePass Verification System &bull; Hackathon Edition

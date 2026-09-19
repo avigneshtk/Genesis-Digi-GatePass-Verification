@@ -103,6 +103,12 @@ async function openDatabase() {
       userId INTEGER NOT NULL,
       createdAt TEXT NOT NULL
     );
+
+    CREATE INDEX IF NOT EXISTS idx_gate_passes_studentId ON gate_passes(studentId);
+    CREATE INDEX IF NOT EXISTS idx_gate_passes_status ON gate_passes(status);
+    CREATE INDEX IF NOT EXISTS idx_gate_passes_qrToken ON gate_passes(qrToken);
+    CREATE INDEX IF NOT EXISTS idx_gate_logs_gatePassId ON gate_logs(gatePassId);
+    CREATE INDEX IF NOT EXISTS idx_gate_logs_studentId ON gate_logs(studentId);
   `);
 
   // Migrate existing tables if they lack the new columns

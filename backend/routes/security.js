@@ -8,13 +8,23 @@ module.exports = function securityRoutes({ db }) {
   // Turns a stored pass row into the answer for the security screen.
   async function checkPass(pass) {
     if (!pass) return { valid: false, reason: 'No gate pass found.' };
-    const student = await db.get('SELECT name, loginId, roomNumber FROM users WHERE id = ?', [pass.studentId]);
+
+    let studentName = pass.studentName;
+    let studentLoginId = pass.studentLoginId;
+    let roomNumber = pass.roomNumber;
+
+    if (studentName === undefined) {
+      const student = await db.get('SELECT name, loginId, roomNumber FROM users WHERE id = ?', [pass.studentId]);
+      studentName = student ? student.name : 'Unknown';
+      studentLoginId = student ? student.loginId : '-';
+      roomNumber = student ? student.roomNumber : '-';
+    }
 
     const passInfo = {
       id: pass.id,
-      studentName: student ? student.name : 'Unknown',
-      studentLoginId: student ? student.loginId : '-',
-      roomNumber: student ? student.roomNumber : '-',
+      studentName: studentName || 'Unknown',
+      studentLoginId: studentLoginId || '-',
+      roomNumber: roomNumber || '-',
       type: pass.type || 'NORMAL',
       reason: pass.reason,
       destination: pass.destination || '',
@@ -112,7 +122,13 @@ module.exports = function securityRoutes({ db }) {
       const token = (req.query.token || '').trim();
       if (!token) return res.status(400).json({ error: 'Please enter or scan a pass token.' });
 
-      const pass = await db.get('SELECT * FROM gate_passes WHERE qrToken = ?', [token]);
+      const pass = await db.get(
+        `SELECT gp.*, u.name AS studentName, u.loginId AS studentLoginId, u.roomNumber
+         FROM gate_passes gp
+         LEFT JOIN users u ON gp.studentId = u.id
+         WHERE gp.qrToken = ?`,
+        [token]
+      );
       if (!pass) {
         return res.json({ valid: false, reason: 'No gate pass found for this token.' });
       }

@@ -20,6 +20,9 @@ export function getApiUrl(path) {
   return base.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
 }
 
+let authPromise = null;
+let cachedUser = null;
+
 export function getSessionToken() {
   return localStorage.getItem('gp_session_token');
 }
@@ -29,7 +32,36 @@ export function setSessionToken(token) {
     localStorage.setItem('gp_session_token', token);
   } else {
     localStorage.removeItem('gp_session_token');
+    cachedUser = null;
   }
+}
+
+export function setCurrentUser(user) {
+  cachedUser = user || null;
+}
+
+export async function getCurrentUser(forceRefresh = false) {
+  if (!forceRefresh && cachedUser) {
+    return cachedUser;
+  }
+  if (!forceRefresh && authPromise) {
+    return authPromise;
+  }
+
+  authPromise = (async () => {
+    try {
+      const data = await api('/api/auth/me');
+      cachedUser = data.user || null;
+      return cachedUser;
+    } catch (err) {
+      cachedUser = null;
+      return null;
+    } finally {
+      authPromise = null;
+    }
+  })();
+
+  return authPromise;
 }
 
 export async function api(path, options = {}) {

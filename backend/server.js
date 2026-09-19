@@ -50,13 +50,10 @@ async function createApp() {
         return next();
       }
 
-      const session = await db.get('SELECT userId FROM sessions WHERE token = ?', [sessionToken]);
-      if (!session) {
-        req.user = null;
-        return next();
-      }
-
-      req.user = await db.get('SELECT * FROM users WHERE id = ?', [session.userId]);
+      req.user = await db.get(
+        'SELECT u.* FROM sessions s JOIN users u ON s.userId = u.id WHERE s.token = ?',
+        [sessionToken]
+      );
       next();
     } catch (err) {
       console.error('Session middleware error:', err);

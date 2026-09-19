@@ -13,8 +13,12 @@ export default function SecurityScanner() {
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [autoRecord, setAutoRecord] = useState(false);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
   const scannerRef = useRef(null);
+  const cooldownEndTimeRef = useRef(0);
+  const cooldownTimerRef = useRef(null);
+  const verifyingRef = useRef(false);
 
   const loadActivity = async () => {
     try {
@@ -27,6 +31,11 @@ export default function SecurityScanner() {
 
   useEffect(() => {
     loadActivity();
+    return () => {
+      if (cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+      }
+    };
   }, []);
 
   const handleRecord = async (gatePassId, action) => {
@@ -51,6 +60,13 @@ export default function SecurityScanner() {
     const cleanToken = (tokenToVerify || '').trim();
     if (!cleanToken) return;
 
+    // Frontend 3-second cooldown guard: ignore subsequent scans immediately
+    if (Date.now() < cooldownEndTimeRef.current) {
+      return;
+    }
+
+    if (verifyingRef.current) return;
+    verifyingRef.current = true;
     setVerifying(true);
     setActionError('');
     setRecordedResult(null);
@@ -59,6 +75,28 @@ export default function SecurityScanner() {
       const data = await api(`/api/security/verify?token=${encodeURIComponent(cleanToken)}`);
       setVerificationResult(data);
 
+      // Start 3-second frontend cooldown after a successful verification
+      if (data && data.valid) {
+        cooldownEndTimeRef.current = Date.now() + 3000;
+        setCooldownRemaining(3);
+
+        if (cooldownTimerRef.current) {
+          clearInterval(cooldownTimerRef.current);
+        }
+
+        let remaining = 3;
+        cooldownTimerRef.current = setInterval(() => {
+          remaining -= 1;
+          if (remaining <= 0) {
+            clearInterval(cooldownTimerRef.current);
+            cooldownTimerRef.current = null;
+            setCooldownRemaining(0);
+          } else {
+            setCooldownRemaining(remaining);
+          }
+        }, 1000);
+      }
+
       // If auto-record is enabled and pass is valid
       if (autoRecord && data.valid && data.nextAction && data.pass) {
         await handleRecord(data.pass.id, data.nextAction);
@@ -66,6 +104,7 @@ export default function SecurityScanner() {
     } catch (err) {
       setVerificationResult({ valid: false, reason: err.message || 'Verification error' });
     } finally {
+      verifyingRef.current = false;
       setVerifying(false);
     }
   };
@@ -98,6 +137,7 @@ export default function SecurityScanner() {
 
       html5QrcodeScanner.render(
         (decodedText) => {
+          if (Date.now() < cooldownEndTimeRef.current) return;
           setTokenInput(decodedText);
           handleVerify(decodedText);
         },
@@ -166,10 +206,38 @@ export default function SecurityScanner() {
           ></div>
         )}
 
+        {/* 3-Second QR Cooldown Status */}
+        {cooldownRemaining > 0 && (
+          <div
+            className="cooldown-status"
+            style={{
+              background: 'rgba(234, 179, 8, 0.15)',
+              border: '1px solid rgba(234, 179, 8, 0.4)',
+              borderRadius: 8,
+              padding: '10px 14px',
+              marginBottom: 16,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              color: '#eab308',
+              fontSize: '0.9rem',
+            }}
+          >
+            <span style={{ fontWeight: 600 }}>✓ Gate Pass Verified</span>
+            <span style={{ fontWeight: 700 }}>Scanner ready in {cooldownRemaining}s</span>
+          </div>
+        )}
+        {cooldownRemaining === 0 && cooldownEndTimeRef.current > 0 && (
+          <div style={{ color: '#6ee7a0', fontSize: '0.85rem', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>●</span> <span>Ready to Scan</span>
+          </div>
+        )}
+
         {/* Manual Token Verification Form */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (Date.now() < cooldownEndTimeRef.current) return;
             handleVerify(tokenInput);
           }}
         >
@@ -184,14 +252,19 @@ export default function SecurityScanner() {
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
                 style={{ flex: 1 }}
+                disabled={verifying || cooldownRemaining > 0}
                 required
               />
               <button
                 type="submit"
-                disabled={verifying}
+                disabled={verifying || cooldownRemaining > 0}
                 style={{ margin: 0, padding: '10px 20px', whiteSpace: 'nowrap' }}
               >
-                {verifying ? 'Verifying...' : 'Check Pass'}
+                {verifying
+                  ? 'Verifying...'
+                  : cooldownRemaining > 0
+                  ? `Wait ${cooldownRemaining}s`
+                  : 'Check Pass'}
               </button>
             </div>
           </div>

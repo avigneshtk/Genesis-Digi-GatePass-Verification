@@ -58,13 +58,24 @@ module.exports = function gatePassRoutes({ db }) {
   // Students see their own passes; wardens see everyone's passes.
   router.get('/', requireRole('STUDENT', 'WARDEN'), async (req, res) => {
     try {
-      let rows;
-      if (req.user.role === 'WARDEN') {
-        rows = await db.all('SELECT * FROM gate_passes ORDER BY id DESC');
-      } else {
-        rows = await db.all('SELECT * FROM gate_passes WHERE studentId = ? ORDER BY id DESC', [req.user.id]);
-      }
-      const passes = await Promise.all(rows.map(passWithStudent));
+      const isWarden = req.user.role === 'WARDEN';
+      const sql = `
+        SELECT gp.*, u.name AS studentName, u.loginId AS studentLoginId, u.roomNumber
+        FROM gate_passes gp
+        LEFT JOIN users u ON gp.studentId = u.id
+        ${isWarden ? '' : 'WHERE gp.studentId = ?'}
+        ORDER BY gp.id DESC
+      `;
+      const rows = await db.all(sql, isWarden ? [] : [req.user.id]);
+      const passes = rows.map((pass) => ({
+        ...pass,
+        type: pass.type || 'NORMAL',
+        destination: pass.destination || '',
+        description: pass.description || '',
+        studentName: pass.studentName || 'Unknown',
+        studentLoginId: pass.studentLoginId || '-',
+        roomNumber: pass.roomNumber || '-',
+      }));
       res.json({ passes });
     } catch (err) {
       console.error('List gatepasses error:', err);
